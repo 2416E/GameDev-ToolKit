@@ -28,6 +28,7 @@ export interface PackResult {
   fileCount: number;
   tableCount: number;
   incrementalCount: number;
+  charCount: number;
   textCount: number;
 }
 
@@ -38,6 +39,7 @@ export class Packer {
   private readonly jsonPath: string;
   private readonly tsPath: string;
   private readonly textPath: string;
+  private readonly textsPath: string;
   private readonly cachePath: string;
 
   private readonly logger = new Logger("Packer");
@@ -57,6 +59,7 @@ export class Packer {
     this.jsonPath = join(options.outputDir, "Config.json");
     this.tsPath = join(options.outputDir, "Config.d.ts");
     this.textPath = join(options.outputDir, "Config.txt");
+    this.textsPath = join(options.outputDir, "Config.texts.txt");
     this.cachePath = join(options.outputDir, "Config.cache");
     this.enableIncremental = options.enableIncremental;
     this.enableJson = options.enableJson;
@@ -71,6 +74,7 @@ export class Packer {
       fileCount: 0,
       tableCount: 0,
       incrementalCount: 0,
+      charCount: 0,
       textCount: 0,
     };
 
@@ -145,8 +149,11 @@ export class Packer {
       }
 
       if (this.enableText) {
-        result.textCount = new TextWriter(this.textPath).writeTables(allTables);
-        this.logger.info(`Text: ${result.textCount} item(s) -> ${this.textPath}`);
+        const text = new TextWriter(this.textPath, this.textsPath).writeTables(allTables);
+        result.charCount = text.characterCount;
+        result.textCount = text.textCount;
+        this.logger.info(`Text: ${result.charCount} char(s) -> ${this.textPath}`);
+        this.logger.info(`Texts: ${result.textCount} item(s) -> ${this.textsPath}`);
       }
 
       this.cacheStore?.save();

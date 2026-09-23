@@ -50,7 +50,7 @@ const OPTION_SPECS: readonly OptionSpec[] = [
     hasValue: false,
     flagValue: true,
     defaultValue: false,
-    description: "Also output collected text (Config.txt)",
+    description: "Also output charset (Config.txt) and text list (Config.texts.txt)",
   },
   {
     key: "enableTypeScript",
