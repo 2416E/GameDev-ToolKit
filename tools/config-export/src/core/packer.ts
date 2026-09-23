@@ -69,7 +69,9 @@ export class Packer {
     try {
       mkdirSync(this.outputDir, { recursive: true });
 
-      if (this.enableIncremental) {
+      // 缓存已由 forceFullPack() 预先创建并清空时不能再从磁盘加载，
+      // 否则被清掉的缓存会被读回，--force 将退化为普通增量导出
+      if (this.enableIncremental && this.cacheStore === null) {
         this.cacheStore = new FileCacheStore<TableInfo[]>(this.cachePath);
       }
 
@@ -152,6 +154,10 @@ export class Packer {
     }
   }
 
+  /**
+   * 强制全量导出：丢弃已有缓存并重新解析所有输入文件。
+   * 必须在此处先建立并清空缓存，pack() 才会跳过磁盘加载。
+   */
   async forceFullPack(): Promise<PackResult> {
     this.enableIncremental = true;
     this.cacheStore = new FileCacheStore<TableInfo[]>(this.cachePath);
