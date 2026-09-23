@@ -42,7 +42,7 @@ async function main(): Promise<number> {
   }
 
   const charsetReader = new CharsetReader();
-  const fontLocator = new FontLocator();
+  const fontLocator = new FontLocator({ outputDir: options.outputDir });
 
   try {
     const charset = charsetReader.read(options.textPaths).join("");
