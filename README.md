@@ -33,6 +33,15 @@ ToolKit/
 
 ## 三、安装
 
+首次使用先克隆仓库（需已配置 GitHub SSH 密钥；也可改用网页上的 HTTPS 地址）：
+
+```bash
+git clone git@github.com:2416E/GameDev-ToolKit.git
+cd GameDev-ToolKit
+```
+
+随后在**工作区根目录**安装依赖：
+
 ```bash
 pnpm install
 ```
