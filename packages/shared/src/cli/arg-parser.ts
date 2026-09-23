@@ -19,10 +19,21 @@ export interface OptionSpec {
    * 因此在解析过程中与同名选项的先后顺序保持一致（后者覆盖前者）。
    */
   acceptsPositional?: boolean;
+  /**
+   * 是否允许同名参数重复出现并累积为字符串数组。
+   *
+   * 声明后该 key 的取值类型为 `string[]`：未出现时为空数组，每次出现按解析顺序追加。
+   * 只能用于取值型参数（`hasValue: true`），且不能声明 `defaultValue`（空数组即默认值）。
+   * 与 `acceptsPositional` 同时声明时，位置参数同样按顺序追加进数组。
+   */
+  repeatable?: boolean;
 }
 
+/** 解析结果的取值：取值型参数为 `string`，布尔开关为 `boolean`，可重复参数为 `string[]` */
+export type OptionValue = string | boolean | string[];
+
 export interface ParsedOptions {
-  values: Record<string, string | boolean>;
+  values: Record<string, OptionValue>;
   /** 未被任何 OptionSpec 接收的位置参数（仅当没有 spec 声明 acceptsPositional 时出现） */
   positionals: string[];
 }
@@ -31,10 +42,10 @@ export interface ParsedOptions {
 const DESCRIPTION_COLUMN = 26;
 
 /**
- * 规格驱动的命令行解析：支持别名、取值参数、布尔开关与位置参数。
+ * 规格驱动的命令行解析：支持别名、取值参数、布尔开关、可重复参数与位置参数。
  */
 export function parseOptions(argv: readonly string[], specs: readonly OptionSpec[]): ParsedOptions {
-  const values: Record<string, string | boolean> = {};
+  const values: Record<string, OptionValue> = {};
   const lookup = new Map<string, OptionSpec>();
   let positionalSpec: OptionSpec | undefined;
 
@@ -45,6 +56,12 @@ export function parseOptions(argv: readonly string[], specs: readonly OptionSpec
 
     if (spec.acceptsPositional) {
       positionalSpec = spec;
+    }
+
+    if (spec.repeatable) {
+      validateRepeatableSpec(spec);
+      values[spec.key] = [];
+      continue;
     }
 
     if (spec.defaultValue !== undefined) {
@@ -68,6 +85,11 @@ export function parseOptions(argv: readonly string[], specs: readonly OptionSpec
         continue;
       }
 
+      if (positionalSpec.repeatable) {
+        appendValue(values, positionalSpec.key, raw);
+        continue;
+      }
+
       const current = values[positionalSpec.key];
       if (typeof current === "string" && current.length > 0) {
         throw new Error(`Unknown option: ${raw}`);
@@ -86,10 +108,36 @@ export function parseOptions(argv: readonly string[], specs: readonly OptionSpec
       throw new Error(`Missing value for ${raw}`);
     }
 
-    values[spec.key] = argv[++i];
+    const value = argv[++i];
+
+    if (spec.repeatable) {
+      appendValue(values, spec.key, value);
+      continue;
+    }
+
+    values[spec.key] = value;
   }
 
   return { values, positionals };
+}
+
+/** 追加取值：可重复参数累积为数组，其余情况保持单值覆盖语义。 */
+function appendValue(values: Record<string, OptionValue>, key: string, value: string): void {
+  const current = values[key];
+  values[key] = Array.isArray(current) ? [...current, value] : [value];
+}
+
+/**
+ * 可重复参数的声明约束在解析期即校验，避免规格书写错误被带到调用方。
+ */
+function validateRepeatableSpec(spec: OptionSpec): void {
+  if (!spec.hasValue) {
+    throw new Error(`Repeatable option must take a value: ${spec.flags.join(", ")}`);
+  }
+
+  if (spec.defaultValue !== undefined) {
+    throw new Error(`Repeatable option cannot declare defaultValue: ${spec.flags.join(", ")}`);
+  }
 }
 
 /**

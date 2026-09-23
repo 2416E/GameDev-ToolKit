@@ -1,6 +1,6 @@
 import { existsSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { formatUsage, OptionSpec, parseOptions } from "@toolkit/shared";
+import { formatUsage, OptionSpec, OptionValue, parseOptions } from "@toolkit/shared";
 import { SubsetFormat } from "../core/subsetter";
 
 export interface CommandOptions {
@@ -148,10 +148,14 @@ function isSubsetFormat(value: string): value is SubsetFormat {
 /**
  * 将逗号分隔的列表值切分为去空白、去空项的数组（保持原有顺序）。
  *
- * 共享包的 `parseOptions` 对同名 flag 只保留最后一次取值，无法累积数组，
- * 因此多个字体/文本文件统一通过逗号分隔的单个取值传入。
+ * 多个字体/文本文件统一通过逗号分隔的单个取值传入。取值若为数组（即参数声明为
+ * `repeatable`）则逐项按同样规则展开，因此切换为可重复参数时本函数无需改动。
  */
-function splitList(value: string | boolean | undefined): string[] {
+function splitList(value: OptionValue | undefined): string[] {
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => splitList(item));
+  }
+
   if (typeof value !== "string") {
     return [];
   }
