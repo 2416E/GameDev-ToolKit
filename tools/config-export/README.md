@@ -13,7 +13,7 @@ ToolKit 工作区中的 Excel 配置导出工具，Node.js + TypeScript 实现�
 - 导出二进制 `Config.bin`
 - 可选导出 `Config.json`
 - 可选导出 TypeScript 声明 `Config.d.ts`
-- 可选导出配置表文字集 `Config.txt`（收集配表中全部文案，可直接喂给字体精简工具）
+- 可选导出文字集：单行去重字符集 `Config.txt` 与去重文案清单 `Config.texts.txt`
 - 支持基于文件哈希的增量导出
 
 ## 二、项目结构
@@ -94,7 +94,7 @@ pnpm start -- [options] [inputDir]
 - `-o, --output <dir>` 输出目录（默认：`输入目录/.generated`）
 - `--no-incremental` 关闭增量导出
 - `--json` 同时导出 JSON 文件
-- `--text` 同时导出文字集 `Config.txt`（收集配表中所有字符串取值的文案，去重）
+- `--text` 同时导出文字集：去重字符集 `Config.txt` 与去重文案清单 `Config.texts.txt`
 - `--no-ts` 不导出 TypeScript 声明
 - `-f, --force` 强制全量导出
 - `-h, --help` 显示帮助
@@ -265,15 +265,25 @@ flowchart LR
 - `Config.cache` 增量缓存文件
 - `Config.json`（启用 `--json` 时）
 - `Config.d.ts`（默认启用，可用 `--no-ts` 关闭）
-- `Config.txt`（启用 `--text` 时）
+- `Config.txt`（启用 `--text` 时，去重字符集）
+- `Config.texts.txt`（启用 `--text` 时，去重文案清单）
 
 文字集（`--text`）的收集规则：
 
 - 只收集 `string` 基础类型的取值，包含 `string[]` 等多维数组的全部元素
 - 数值、布尔与 `pair` 类型的取值不含文字，不会被收集
 - 表名、字段名与描述属于开发期元信息，不会出现在游戏里，因此不参与收集——否则会把大量永不显示的字符带进字体子集，白白撑大包体
-- 相同文案跨表去重，输出顺序为「表 → 行 → 字段」，每条文案一行，末尾保留换行
-- 增量导出时同样成立：表格数据取自缓存，文字集仍按全量重新生成
+- 文案跨表去重，收集顺序为「表 → 行 → 字段」
+- 增量导出时同样成立：表格数据取自缓存，两个产物仍按全量重新生成
+
+两个产物的分工：
+
+| 文件 | 内容 | 用途 |
+|---|---|---|
+| `Config.txt` | 全部文案中的**唯一字符**，单行输出，无分隔符与换行 | 直接作为 `font-subset -t` 的输入；每个字符只出现一次，可直观看出字符集规模 |
+| `Config.texts.txt` | 去重后的**文案清单**，每条文案一行，末尾保留换行 | 核对哪些文案被纳入、排查漏字 |
+
+`Config.txt` 收集的是**字符**而非文案，不保留文案边界；需要确认「某条文案是否被纳入」时请看 `Config.texts.txt`。
 
 ## 八点五、浏览器环境解析 Config.bin
 
