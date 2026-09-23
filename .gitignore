@@ -2,6 +2,9 @@ node_modules/
 dist/
 .generated/
 
+# IDE / AI assistant local data
+.codebuddy/
+
 # npm and local tooling output
 npm-debug.log*
 yarn-debug.log*
