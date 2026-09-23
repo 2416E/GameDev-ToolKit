@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .generated/
+.subset/
 
 # IDE / AI assistant local data
 .codebuddy/
