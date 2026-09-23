@@ -66,6 +66,7 @@ pnpm typecheck
 pnpm config-export -i ./ConfigTables -o ./Output --json
 
 # 运行 font-subset 工具：按字符集精简字体文件或字体目录
+# 字符集文本可直接使用 config-export --text 产出的 Config.txt
 pnpm font-subset ./Fonts -t ./Charset.txt --formats ttf,woff2
 ```
 
@@ -80,7 +81,7 @@ pnpm --filter @toolkit/config-export start -- ./ConfigTables
 
 | 工具 | 包名 | 说明 |
 |---|---|---|
-| [config-export](tools/config-export/README.md) | `@toolkit/config-export` | 将 Excel 配置表导出为 `Config.bin`，可选导出 `Config.json` 与 `Config.d.ts` |
+| [config-export](tools/config-export/README.md) | `@toolkit/config-export` | 将 Excel 配置表导出为 `Config.bin`，可选导出 `Config.json`、`Config.d.ts` 与文字集 `Config.txt` |
 | [font-subset](tools/font-subset/README.md) | `@toolkit/font-subset` | 按文本字符集对 `TTF`/`OTF` 字体做子集化精简，输出 `ttf`/`woff`/`woff2` 并附带字符集清单 |
 
 ## 六、如何新增一个工具
