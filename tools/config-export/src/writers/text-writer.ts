@@ -1,6 +1,14 @@
 import { writeFileSync } from "node:fs";
 import { FieldType, TableInfo } from "@toolkit/shared";
 
+/**
+ * 固定纳入字符集的字符：英文大小写字母与 `0-9` 数字。
+ *
+ * 这些字符常由代码动态拼接（等级、分数、数量、道具 ID 等），不会出现在配表文案里，
+ * 若不固定纳入，运行时就可能出现缺字方块。
+ */
+const FIXED_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
 export interface TextWriteResult {
   /** 去重后的字符数（按码点计） */
   characterCount: number;
@@ -11,8 +19,10 @@ export interface TextWriteResult {
 /**
  * 收集配置表中的文字，写出两个产物：
  *
- * - 去重字符集：每个字符只出现一次，单行输出，可直接作为 `font-subset -t` 的输入
- * - 去重文案清单：每条文案一行，便于核对哪些文案被纳入、排查漏字
+ * - 去重字符集：每个字符只出现一次，单行输出，可直接作为 `font-subset -t` 的输入。
+ *   除配表文案中的字符外，还会固定纳入 `FIXED_CHARACTERS`（英文大小写与 `0-9`）
+ * - 去重文案清单：每条文案一行，便于核对哪些文案被纳入、排查漏字。
+ *   该文件只记录配表文案，不含固定字符
  *
  * 只收集 `string` 基础类型的取值（含 `string[]` 等多维数组的全部元素）。
  * 表名、字段名与描述属于开发期元信息，不会出现在游戏里，因此不参与收集，
@@ -31,9 +41,10 @@ export class TextWriter {
   writeTables(tables: TableInfo[]): TextWriteResult {
     const texts = collectTexts(tables);
 
-    // 直接按码点迭代字符串去重（而非 split("")），避免把 emoji 等
+    // 固定字符置于最前，使 Config.txt 的前缀稳定：配表文案的增删只在尾部产生 diff。
+    // 展开运算符对字符串按码点迭代（而非 split("")），避免把 emoji 等
     // BMP 外字符拆成两个孤立的代理项码元
-    const characters = new Set(texts.join(""));
+    const characters = new Set([...FIXED_CHARACTERS, ...texts.join("")]);
 
     writeFileSync(this.charsetPath, [...characters].join(""), "utf8");
     writeFileSync(
