@@ -7,6 +7,7 @@ export interface CommandOptions {
   enableIncremental: boolean;
   enableJson: boolean;
   enableTypeScript: boolean;
+  enableText: boolean;
   forceFullPack: boolean;
   showHelp: boolean;
 }
@@ -42,6 +43,14 @@ const OPTION_SPECS: readonly OptionSpec[] = [
     flagValue: true,
     defaultValue: false,
     description: "Also output JSON",
+  },
+  {
+    key: "enableText",
+    flags: ["--text"],
+    hasValue: false,
+    flagValue: true,
+    defaultValue: false,
+    description: "Also output collected text (Config.txt)",
   },
   {
     key: "enableTypeScript",
@@ -92,6 +101,7 @@ export function parseArgs(argv: string[]): CommandOptions {
     enableIncremental: values.enableIncremental === true,
     enableJson: values.enableJson === true,
     enableTypeScript: values.enableTypeScript === true,
+    enableText: values.enableText === true,
     forceFullPack: values.forceFullPack === true,
     showHelp: values.showHelp === true,
   };

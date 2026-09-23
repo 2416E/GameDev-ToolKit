@@ -30,6 +30,7 @@ async function main(): Promise<number> {
     enableIncremental: options.enableIncremental,
     enableJson: options.enableJson,
     enableTypeScript: options.enableTypeScript,
+    enableText: options.enableText,
   });
 
   const result = options.forceFullPack

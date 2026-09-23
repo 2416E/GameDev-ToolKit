@@ -10,6 +10,7 @@ import { TableParser } from "../parsers/table-parser";
 import { ExcelReader } from "../readers/excel-reader";
 import { BinaryWriter } from "../writers/binary-writer";
 import { JsonWriter } from "../writers/json-writer";
+import { TextWriter } from "../writers/text-writer";
 import { TypeScriptWriter } from "../writers/typescript-writer";
 
 export interface PackerOptions {
@@ -18,6 +19,7 @@ export interface PackerOptions {
   enableIncremental: boolean;
   enableJson: boolean;
   enableTypeScript: boolean;
+  enableText: boolean;
 }
 
 export interface PackResult {
@@ -26,6 +28,7 @@ export interface PackResult {
   fileCount: number;
   tableCount: number;
   incrementalCount: number;
+  textCount: number;
 }
 
 export class Packer {
@@ -34,6 +37,7 @@ export class Packer {
   private readonly binaryPath: string;
   private readonly jsonPath: string;
   private readonly tsPath: string;
+  private readonly textPath: string;
   private readonly cachePath: string;
 
   private readonly logger = new Logger("Packer");
@@ -44,6 +48,7 @@ export class Packer {
   private enableIncremental: boolean;
   private readonly enableJson: boolean;
   private readonly enableTypeScript: boolean;
+  private readonly enableText: boolean;
 
   constructor(options: PackerOptions) {
     this.inputDir = options.inputDir;
@@ -51,10 +56,12 @@ export class Packer {
     this.binaryPath = join(options.outputDir, "Config.bin");
     this.jsonPath = join(options.outputDir, "Config.json");
     this.tsPath = join(options.outputDir, "Config.d.ts");
+    this.textPath = join(options.outputDir, "Config.txt");
     this.cachePath = join(options.outputDir, "Config.cache");
     this.enableIncremental = options.enableIncremental;
     this.enableJson = options.enableJson;
     this.enableTypeScript = options.enableTypeScript;
+    this.enableText = options.enableText;
   }
 
   async pack(): Promise<PackResult> {
@@ -64,6 +71,7 @@ export class Packer {
       fileCount: 0,
       tableCount: 0,
       incrementalCount: 0,
+      textCount: 0,
     };
 
     try {
@@ -134,6 +142,11 @@ export class Packer {
       if (this.enableTypeScript) {
         new TypeScriptWriter(this.tsPath).writeTables(allTables);
         this.logger.info(`TypeScript: ${this.tsPath}`);
+      }
+
+      if (this.enableText) {
+        result.textCount = new TextWriter(this.textPath).writeTables(allTables);
+        this.logger.info(`Text: ${result.textCount} item(s) -> ${this.textPath}`);
       }
 
       this.cacheStore?.save();
