@@ -1,0 +1,16 @@
+{
+  "name": "@toolkit/shared",
+  "version": "1.0.0",
+  "description": "Shared protocol types, binary helpers, CLI and cache utilities for ToolKit tools",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -w -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}
