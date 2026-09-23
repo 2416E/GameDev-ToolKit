@@ -1,0 +1,21 @@
+{
+  "name": "@toolkit/config-export",
+  "version": "1.0.0",
+  "description": "Excel config export tool (binary/json/typescript)",
+  "private": true,
+  "main": "dist/index.js",
+  "type": "commonjs",
+  "bin": {
+    "config-export": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "tsc -w -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@toolkit/shared": "workspace:*",
+    "xlsx": "^0.18.5"
+  }
+}
