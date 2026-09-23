@@ -15,9 +15,9 @@ ToolKit/
 │       └── src/
 │           ├── types/         # 表/字段类型与协议数据模型（唯一事实来源）
 │           ├── binary/        # MAGIC / VERSION 常量与二进制缓冲写入器
-│           ├── utils/         # MD5 哈希、递归文件扫描
+│           ├── utils/         # MD5 哈希、递归文件扫描（支持一次扫描匹配多个扩展名）
 │           ├── logger/        # 带 [模块名] 前缀的统一日志器
-│           ├── cli/           # 规格驱动的命令行解析与帮助文本生成
+│           ├── cli/           # 规格驱动的命令行解析（支持可重复参数）与帮助文本生成
 │           └── cache/         # 基于文件哈希的通用增量缓存 FileCacheStore<T>
 └── tools/                     # 工具层：各工具的业务实现
     ├── config-export/         # @toolkit/config-export：Excel 配置导出工具
