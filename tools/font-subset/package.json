@@ -1,0 +1,21 @@
+{
+  "name": "@toolkit/font-subset",
+  "version": "1.0.0",
+  "description": "Font subsetting tool (ttf/otf to ttf/woff/woff2 by charset)",
+  "private": true,
+  "main": "dist/index.js",
+  "type": "commonjs",
+  "bin": {
+    "font-subset": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "tsc -w -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@toolkit/shared": "workspace:*",
+    "subset-font": "^2.9.0"
+  }
+}

@@ -20,7 +20,8 @@ ToolKit/
 │           ├── cli/           # 规格驱动的命令行解析与帮助文本生成
 │           └── cache/         # 基于文件哈希的通用增量缓存 FileCacheStore<T>
 └── tools/                     # 工具层：各工具的业务实现
-    └── config-export/         # @toolkit/config-export：Excel 配置导出工具
+    ├── config-export/         # @toolkit/config-export：Excel 配置导出工具
+    └── font-subset/           # @toolkit/font-subset：字体精简（子集化）工具
 ```
 
 依赖方向是单向的：`tools/* → packages/shared`，共享包不感知任何工具。
@@ -54,6 +55,9 @@ pnpm typecheck
 
 # 运行 config-export 工具（参数直接跟在脚本名之后）
 pnpm config-export -i ./ConfigTables -o ./Output --json
+
+# 运行 font-subset 工具：按字符集精简字体文件或字体目录
+pnpm font-subset ./Fonts -t ./Charset.txt --formats ttf,woff2
 ```
 
 只操作某个包：
@@ -68,6 +72,7 @@ pnpm --filter @toolkit/config-export start -- ./ConfigTables
 | 工具 | 包名 | 说明 |
 |---|---|---|
 | [config-export](tools/config-export/README.md) | `@toolkit/config-export` | 将 Excel 配置表导出为 `Config.bin`，可选导出 `Config.json` 与 `Config.d.ts` |
+| [font-subset](tools/font-subset/README.md) | `@toolkit/font-subset` | 按文本字符集对 `TTF`/`OTF` 字体做子集化精简，输出 `ttf`/`woff`/`woff2` 并附带字符集清单 |
 
 ## 六、如何新增一个工具
 

@@ -11,7 +11,8 @@
     "build": "pnpm -r build",
     "dev": "pnpm -r --parallel dev",
     "typecheck": "pnpm -r typecheck",
-    "config-export": "node tools/config-export/dist/index.js"
+    "config-export": "node tools/config-export/dist/index.js",
+    "font-subset": "node tools/font-subset/dist/index.js"
   },
   "devDependencies": {
     "@types/node": "^20.17.0",
