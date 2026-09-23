@@ -13,10 +13,17 @@ export interface OptionSpec {
   flagValue?: string | boolean;
   /** 取值型参数的占位符，默认 "<value>" */
   valuePlaceholder?: string;
+  /**
+   * 是否接收位置参数。最多只能有一个 spec 声明为 true。
+   * 位置参数仅在该 key 当时尚未被赋值时接收，否则报 `Unknown option`，
+   * 因此在解析过程中与同名选项的先后顺序保持一致（后者覆盖前者）。
+   */
+  acceptsPositional?: boolean;
 }
 
 export interface ParsedOptions {
   values: Record<string, string | boolean>;
+  /** 未被任何 OptionSpec 接收的位置参数（仅当没有 spec 声明 acceptsPositional 时出现） */
   positionals: string[];
 }
 
@@ -29,10 +36,15 @@ const DESCRIPTION_COLUMN = 26;
 export function parseOptions(argv: readonly string[], specs: readonly OptionSpec[]): ParsedOptions {
   const values: Record<string, string | boolean> = {};
   const lookup = new Map<string, OptionSpec>();
+  let positionalSpec: OptionSpec | undefined;
 
   for (const spec of specs) {
     for (const flag of spec.flags) {
       lookup.set(flag.toLowerCase(), spec);
+    }
+
+    if (spec.acceptsPositional) {
+      positionalSpec = spec;
     }
 
     if (spec.defaultValue !== undefined) {
@@ -47,12 +59,22 @@ export function parseOptions(argv: readonly string[], specs: readonly OptionSpec
     const spec = lookup.get(raw.toLowerCase());
 
     if (!spec) {
-      if (!raw.startsWith("-")) {
+      if (raw.startsWith("-")) {
+        throw new Error(`Unknown option: ${raw}`);
+      }
+
+      if (!positionalSpec) {
         positionals.push(raw);
         continue;
       }
 
-      throw new Error(`Unknown option: ${raw}`);
+      const current = values[positionalSpec.key];
+      if (typeof current === "string" && current.length > 0) {
+        throw new Error(`Unknown option: ${raw}`);
+      }
+
+      values[positionalSpec.key] = raw;
+      continue;
     }
 
     if (!spec.hasValue) {

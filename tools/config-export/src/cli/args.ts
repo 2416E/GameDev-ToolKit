@@ -17,6 +17,7 @@ const OPTION_SPECS: readonly OptionSpec[] = [
     flags: ["-i", "--input"],
     hasValue: true,
     valuePlaceholder: "<dir>",
+    acceptsPositional: true,
     description: "Input directory (default: executable directory)",
   },
   {
@@ -69,18 +70,10 @@ const OPTION_SPECS: readonly OptionSpec[] = [
 ];
 
 export function parseArgs(argv: string[]): CommandOptions {
-  const { values, positionals } = parseOptions(argv, OPTION_SPECS);
+  const { values } = parseOptions(argv, OPTION_SPECS);
   const defaultDir = dirname(process.argv[1] ?? process.cwd());
 
   let inputDir = typeof values.inputDir === "string" ? values.inputDir : "";
-
-  for (const positional of positionals) {
-    if (inputDir.length > 0) {
-      throw new Error(`Unknown option: ${positional}`);
-    }
-
-    inputDir = positional;
-  }
 
   if (!inputDir) {
     inputDir = defaultDir;
